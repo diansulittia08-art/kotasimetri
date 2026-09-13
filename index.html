@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>🏙️ KOTA SIMETRI - Petualangan Transformasi Geometri</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            900: '#0f172a',
+                            neon: '#00f0ff',
+                            pink: '#ff007f',
+                            gold: '#ffd700',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Canvas Confetti CDN for celebration effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Custom Styling & Animations -->
+    <style>
+        * {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-panel-glow {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-cyber {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.6);
+        }
+
+        .btn-cyber-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-cyber-pink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.4), 0 0 30px rgba(6, 182, 212, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.8), 0 0 50px rgba(0, 240, 255, 0.5); }
+        }
+        
+        .glow-active {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes float-icon {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.03); }
+        }
+
+        .animate-float {
+            animation: float-icon 3s ease-in-out infinite;
+        }
+
+        #game-canvas {
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #game-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative bg-slate-950 text-slate-100">
+
+    <!-- PROFESSIONAL LOADING SCREEN OVERLAY -->
+    <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-700">
+        <div class="relative flex flex-col items-center space-y-6 max-w-sm px-6 text-center">
+            <!-- Icon Image with Neon Glow Container -->
+            <div class="relative group">
+                <div class="absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 blur-xl opacity-75 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+                <a href="https://ibb.co.com/Qj9Gsww0" target="_blank" rel="noopener noreferrer" class="relative block rounded-2xl overflow-hidden border-2 border-cyan-400/50 shadow-2xl bg-slate-900">
+                    <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Kota Simetri Logo" class="w-28 h-28 object-cover animate-float">
+                </a>
+            </div>
+
+            <div>
+                <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 uppercase">
+                    KOTA SIMETRI
+                </h1>
+                <p class="text-xs text-slate-400 font-semibold tracking-wide mt-1">Petualangan Transformasi Geometri</p>
+            </div>
+
+            <!-- Loading Bar -->
+            <div class="w-56 space-y-2">
+                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                    <div id="loading-bar" class="bg-gradient-to-r from-cyan-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span id="loading-text">Memuat Sistem...</span>
+                    <span id="loading-percent">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER / NAVIGATION HUD -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('home')">
+            <div class="w-10 h-10 rounded-xl bg-slate-900 border border-cyan-500/40 overflow-hidden flex items-center justify-center shadow-lg shadow-cyan-500/20 hover:scale-105 transition">
+                <a href="https://ibb.co.com/Qj9Gsww0" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">
+                    <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Kota Simetri Logo" class="w-full h-full object-cover">
+                </a>
+            </div>
+            <div>
+                <h1 class="font-black text-lg leading-none tracking-tight text-white flex items-center gap-2">
+                    KOTA SIMETRI
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30">SMP Kelas IX</span>
+                </h1>
+                <p class="text-xs text-slate-400 mt-0.5">Guru: <span class="text-cyan-300 font-semibold">Dian Agustin Sulittia, S.Pd.</span></p>
+            </div>
+        </div>
+
+        <!-- HUD Quick Stats -->
+        <div id="header-hud" class="hidden md:flex items-center gap-4 text-xs font-semibold bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800">
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-user text-cyan-400"></i>
+                <span id="hud-name" class="text-slate-200">Murid</span>
+            </div>
+            <div class="h-4 w-[1px] bg-slate-800"></div>
+            <div class="flex items-center gap-1.5" title="XP (Pengalaman)">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
+                <span id="hud-xp" class="text-yellow-400">0 XP</span>
+            </div>
+            <div class="h-4 w-[1px] bg-slate-800"></div>
+            <div class="flex items-center gap-1.5" title="Total Skor">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                <span id="hud-score" class="text-amber-300">0 Poin</span>
+            </div>
+            <div class="h-4 w-[1px] bg-slate-800"></div>
+            <div class="flex items-center gap-1" title="Nyawa Tersisa">
+                <span id="hud-lives" class="flex gap-0.5 text-red-500 text-sm">❤️❤️❤️</span>
+            </div>
+        </div>
+
+        <!-- Navigation Action Buttons -->
+        <div class="flex items-center gap-2">
+            <button onclick="toggleAudio()" id="btn-audio" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Efek Suara">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button onclick="showView('map')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 transition flex items-center gap-1">
+                <i class="fa-solid fa-map"></i> <span class="hidden sm:inline">Peta Misi</span>
+            </button>
+            <button onclick="showView('home')" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Beranda">
+                <i class="fa-solid fa-house"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-6xl relative z-10">
+
+        <!-- 1. VIEW HOME -->
+        <section id="view-home" class="view-section space-y-8">
+            <div class="glass-panel-glow rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-cyan-500/30">
+                <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                    <div class="flex-1 space-y-4">
+                        <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold tracking-wider uppercase border border-cyan-500/30">
+                            ⚡ Gim Pembelajaran Interaktif Matematika
+                        </span>
+                        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                            KOTA SIMETRI
+                        </h2>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                            Selamat datang, Arsitek Muda! Bantu kami memulihkan Kota Simetri yang mengalami dislokasi koordinat. Terapkan kekuatan <strong class="text-cyan-400">TRANSLASI</strong> (Pergeseran) dan <strong class="text-pink-400">REFLEKSI</strong> (Pencerminan) pada bidang koordinat 2D secara langsung!
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="openRegistrationModal()" class="btn-cyber text-slate-950 font-extrabold px-6 py-3.5 rounded-xl text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> MULAI PERMAINAN
+                            </button>
+                            <button onclick="showView('materi')" class="px-5 py-3.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-semibold text-sm border border-slate-700 transition flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-cyan-400"></i> Pelajari Materi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Icon Branding Container -->
+                    <div class="w-36 h-36 sm:w-44 sm:h-44 shrink-0 rounded-3xl bg-slate-900/80 p-3 border-2 border-cyan-500/40 shadow-2xl shadow-cyan-500/20 flex items-center justify-center glow-active animate-float">
+                        <a href="https://ibb.co.com/Qj9Gsww0" target="_blank" rel="noopener noreferrer" class="w-full h-full block rounded-2xl overflow-hidden">
+                            <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Kota Simetri Emblem" class="w-full h-full object-cover">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Status Player Card -->
+                <div class="glass-panel rounded-2xl p-6 space-y-4 border border-slate-800">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="font-bold text-slate-200 flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-id-card text-cyan-400"></i> Lisensi Arsitek
+                        </h3>
+                        <button onclick="openRegistrationModal()" class="text-xs text-cyan-400 hover:underline">Ganti Nama</button>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-cyan-500/30 p-1 flex items-center justify-center text-2xl shadow-lg shadow-cyan-500/20">
+                            <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Avatar Icon" class="w-full h-full object-cover rounded-xl">
+                        </div>
+                        <div>
+                            <p id="profile-name" class="font-extrabold text-lg text-white">Murid IX</p>
+                            <p id="profile-rank" class="text-xs text-cyan-400 font-medium">🌱 Arsitek Pemula</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 pt-2 text-xs">
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block mb-1">Total XP</span>
+                            <span id="profile-xp" class="text-lg font-extrabold text-yellow-400">0 XP</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                            <span class="text-slate-400 block mb-1">Skor Gim</span>
+                            <span id="profile-score" class="text-lg font-extrabold text-amber-300">0 Poin</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs text-slate-400 pt-1">
+                        <span>Nyawa Tersisa:</span>
+                        <span id="profile-lives" class="text-red-500 font-bold text-sm">❤️❤️❤️</span>
+                    </div>
+
+                    <div class="pt-2 flex gap-2">
+                        <button onclick="saveGameState()" class="w-1/2 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-semibold text-slate-300 border border-slate-700">
+                            💾 Simpan Progress
+                        </button>
+                        <button onclick="resetGameState()" class="w-1/2 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[11px] font-semibold text-red-400 border border-red-500/20">
+                            ↺ Reset Progress
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Quick Cards -->
+                <div class="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <button onclick="showView('objectives')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg group-hover:scale-110 transition">🎯</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Tujuan</h4>
+                            <p class="text-[11px] text-slate-400">Capaian Pembelajaran</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showView('storyline')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg group-hover:scale-110 transition">📖</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Storyline</h4>
+                            <p class="text-[11px] text-slate-400">Kisah Kota Simetri</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showView('tutorial')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-green-500/10 text-green-400 flex items-center justify-center text-lg group-hover:scale-110 transition">🕹️</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Petunjuk</h4>
+                            <p class="text-[11px] text-slate-400">Cara Bermain Drag & Drop</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showView('badges')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center text-lg group-hover:scale-110 transition">🏆</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Badge</h4>
+                            <p class="text-[11px] text-slate-400">Koleksi Lencana Arsitek</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showView('leaderboard')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg group-hover:scale-110 transition">📊</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Papan Skor</h4>
+                            <p class="text-[11px] text-slate-400">Peringkat Prestasi</p>
+                        </div>
+                    </button>
+
+                    <button onclick="showView('evaluation')" class="glass-panel p-4 rounded-2xl hover:border-cyan-500/40 transition text-left flex flex-col justify-between group">
+                        <div class="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center text-lg group-hover:scale-110 transition">📝</div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Evaluasi</h4>
+                            <p class="text-[11px] text-slate-400">10 Soal Uji Kompetensi</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. VIEW TUJUAN PEMBELAJARAN -->
+        <section id="view-objectives" class="view-section hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-black text-white flex items-center gap-2">🎯 TUJUAN PEMBELAJARAN</h2>
+                    <p class="text-xs text-slate-400">Kompetensi Dasar Transformasi Geometri Kelas IX SMP</p>
+                </div>
+                <button onclick="showView('home')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold">Kembali</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-cyan-500">
+                    <h3 class="font-bold text-cyan-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-up-down-left-right"></i> Target Translasi (Pergeseran)
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                        <li>Menjelaskan konsep translasi objek pada bidang kartesius $2D$.</li>
+                        <li>Menentukan hasil translasi titik $A(x,y)$ oleh komponen vector $T(a,b)$.</li>
+                        <li>Menganalisis pergeseran koordinat $(x+a, y+b)$ pada bangunan kota.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-pink-500">
+                    <h3 class="font-bold text-pink-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-mirror"></i> Target Refleksi (Pencerminan)
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                        <li>Menjelaskan sifat pencerminan simetris terhadap sumbu utama.</li>
+                        <li>Menentukan koordinat bayangan refleksi Sumbu-X: $(x,y) \rightarrow (x,-y)$.</li>
+                        <li>Menentukan koordinat bayangan refleksi Sumbu-Y: $(x,y) \rightarrow (-x,y)$.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-amber-500">
+                    <h3 class="font-bold text-amber-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-brain"></i> Kemampuan Berpikir Kritis
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                        <li>Menyelesaikan permasalahan tata kota simetris dengan kombinasi transformasi.</li>
+                        <li>Memverifikasi koordinat secara presisi menggunakan sistem snapping grid.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-emerald-500">
+                    <h3 class="font-bold text-emerald-400 text-sm mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap"></i> Informasi Pembelajaran
+                    </h3>
+                    <div class="text-xs text-slate-300 space-y-1 font-sans">
+                        <p><strong class="text-slate-200">Mata Pelajaran:</strong> Matematika Kelas IX SMP</p>
+                        <p><strong class="text-slate-200">Materi Pokok:</strong> Transformasi Geometri (Translasi & Refleksi)</p>
+                        <p><strong class="text-slate-200">Guru Pengampu:</strong> Dian Agustin Sulittia, S.Pd.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. VIEW STORYLINE -->
+        <section id="view-storyline" class="view-section hidden space-y-6">
+            <div class="glass-panel-glow p-8 rounded-3xl space-y-6 border border-cyan-500/30">
+                <div class="flex items-center gap-4">
+                    <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Emblem" class="w-16 h-16 rounded-2xl object-cover border border-cyan-400/40">
+                    <div>
+                        <h2 class="text-2xl font-black text-white">KISAH KOTA SIMETRI</h2>
+                        <p class="text-xs text-cyan-400 font-semibold">Restorasi Tata Kota Berbasis Matematika</p>
+                    </div>
+                </div>
+
+                <div class="text-xs sm:text-sm text-slate-300 space-y-4 leading-relaxed bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
+                    <p>
+                        <strong>Kota Simetri</strong> adalah ibu kota futuristik yang dibangun dengan prinsip keseimbangan simetris dan ketepatan koordinat kartesius.
+                    </p>
+                    <p>
+                        Suatu hari, <span class="text-red-400 font-bold">Badai Anomali Geometri</span> melanda dan menggeser posisi rumah, sekolah, gedung, serta taman dari koordinat aslinya. Sisi kota yang seharusnya bercermin indah menjadi berantakan!
+                    </p>
+                    <p class="text-cyan-300 font-bold">
+                        Sebagai Arsitek Utama di bawah bimbingan Ibu Dian Agustin Sulittia, S.Pd., tugasmu adalah memindahkan dan mencerminkan bangunan kembali ke koordinat target yang benar!
+                    </p>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button onclick="showView('map')" class="btn-cyber text-slate-950 font-extrabold px-6 py-3 rounded-xl text-xs flex items-center gap-2">
+                        BUKA PETA MISI <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. VIEW TUTORIAL -->
+        <section id="view-tutorial" class="view-section hidden space-y-6">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">🕹️ PETUNJUK PERMAINAN INTERAKTIF</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel p-5 rounded-2xl text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">1</div>
+                    <h3 class="font-bold text-slate-200 text-sm">Pahami Misi</h3>
+                    <p class="text-xs text-slate-400">Baca instruksi translasi atau refleksi pada panel target di kanan layar.</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">2</div>
+                    <h3 class="font-bold text-slate-200 text-sm">Drag Objek</h3>
+                    <p class="text-xs text-slate-400">Sentuh atau klik & tahan objek (rumah, sekolah, titik) lalu seret ke titik grid.</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">3</div>
+                    <h3 class="font-bold text-slate-200 text-sm">Cek Real-Time HUD</h3>
+                    <p class="text-xs text-slate-400">Koordinat objek dan titik sudut diperbarui secara otomatis saat digeser.</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">4</div>
+                    <h3 class="font-bold text-slate-200 text-sm">Verifikasi & Reward</h3>
+                    <p class="text-xs text-slate-400">Tekan 'Verifikasi Posisi' untuk memperoleh Poin, XP, dan Bintang ⭐.</p>
+                </div>
+            </div>
+
+            <div class="text-center pt-4">
+                <button onclick="showView('map')" class="btn-cyber text-slate-950 font-bold px-8 py-3 rounded-xl text-xs">
+                    MENUJU PETA KOTA
+                </button>
+            </div>
+        </section>
+
+        <!-- 5. VIEW MATERI INTERAKTIF -->
+        <section id="view-materi" class="view-section hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📖 MODUL MATERI INTERAKTIF</h2>
+                    <p class="text-xs text-slate-400">Transformasi Geometri: Translasi dan Refleksi</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="switchMateriTab('translasi')" id="tab-btn-translasi" class="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 transition">
+                        1. TRANSLASI
+                    </button>
+                    <button onclick="switchMateriTab('refleksi')" id="tab-btn-refleksi" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                        2. REFLEKSI
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Content 1: Translasi -->
+            <div id="materi-tab-translasi" class="glass-panel p-6 rounded-3xl space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-4">
+                        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold border border-cyan-500/30">
+                            1. CONCEPTS TRANSLASI (PERGESERAN)
+                        </span>
+                        <h3 class="text-xl font-bold text-white">Definisi dan Rumus Translasi</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Translasi memindahkan setiap titik pada bidang kartesius dengan jarak dan arah tertentu tanpa merubah bentuk dan ukuran objek.
+                        </p>
+
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-cyan-500/30 text-xs font-mono space-y-2">
+                            <p class="text-cyan-300 font-bold">Rumus Translasi Titik $A(x,y)$ oleh $T(a,b)$:</p>
+                            <p class="text-sm text-yellow-300">$A(x, y) \xrightarrow{T(a,b)} A'(x + a, y + b)$</p>
+                            <ul class="text-slate-400 space-y-1 font-sans text-xs">
+                                <li>• Komponen $a$: Pergeseran horizontal ($+a$ ke kanan, $-a$ ke kiri)</li>
+                                <li>• Komponen $b$: Pergeseran vertikal ($+b$ ke atas, $-b$ ke bawah)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 text-center space-y-3">
+                        <p class="text-xs font-bold text-cyan-400">Simulasi Animasi Translasi</p>
+                        <canvas id="materi-canvas-translasi" width="300" height="240" class="mx-auto rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                        <button onclick="playMateriTranslasiAnim()" class="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold border border-cyan-500/30">
+                            <i class="fa-solid fa-play mr-1"></i> Jalankan Animasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Refleksi -->
+            <div id="materi-tab-refleksi" class="glass-panel p-6 rounded-3xl space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="space-y-4">
+                        <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold border border-pink-500/30">
+                            2. CONCEPTS REFLEKSI (PENCERMINAN)
+                        </span>
+                        <h3 class="text-xl font-bold text-white">Sifat Pencerminan Geometri</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Refleksi memindahkan titik dengan sifat cermin datar: jarak objek ke garis cermin sama dengan jarak bayangan ke cermin.
+                        </p>
+
+                        <div class="space-y-2 text-xs font-mono">
+                            <div class="bg-slate-900 p-3 rounded-xl border border-pink-500/30">
+                                <p class="text-pink-300 font-bold">1. Refleksi terhadap Sumbu-X:</p>
+                                <p class="text-yellow-300 text-sm">$(x, y) \xrightarrow{\text{Sumbu-X}} (x, -y)$</p>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-xl border border-pink-500/30">
+                                <p class="text-pink-300 font-bold">2. Refleksi terhadap Sumbu-Y:</p>
+                                <p class="text-yellow-300 text-sm">$(x, y) \xrightarrow{\text{Sumbu-Y}} (-x, y)$</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 text-center space-y-3">
+                        <p class="text-xs font-bold text-pink-400">Simulasi Animasi Refleksi</p>
+                        <canvas id="materi-canvas-refleksi" width="300" height="240" class="mx-auto rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="playMateriRefleksiAnim('X')" class="px-3 py-1.5 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 text-xs font-semibold border border-pink-500/30">
+                                Refleksi Sumbu-X
+                            </button>
+                            <button onclick="playMateriRefleksiAnim('Y')" class="px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-semibold border border-purple-500/30">
+                                Refleksi Sumbu-Y
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. VIEW PETA MISI KOTA -->
+        <section id="view-map" class="view-section hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+                <h2 class="text-3xl font-black text-white">🗺️ PETA KOTA SIMETRI</h2>
+                <p class="text-xs text-slate-400">Pilih sektor wilayah kota untuk memulai misi penataan geometri</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 pt-4">
+                <!-- Level 1 Node -->
+                <div id="level-node-1" onclick="selectLevel(1)" class="glass-panel p-5 rounded-2xl border border-cyan-500/40 hover:scale-105 transition cursor-pointer flex flex-col justify-between h-56 relative group">
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl">🏠</span>
+                        <span id="status-lvl-1" class="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 font-bold border border-green-500/30">🔓 Terbuka</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-cyan-400 font-extrabold uppercase">LEVEL 1</span>
+                        <h3 class="font-bold text-slate-100 text-sm">Dasar Pergeseran</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Langkah awal translasi 1-2 arah</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">⭐ <span id="stars-lvl-1">0/3</span></span>
+                        <i class="fa-solid fa-arrow-right text-cyan-400 group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <!-- Level 2 Node -->
+                <div id="level-node-2" onclick="selectLevel(2)" class="glass-panel p-5 rounded-2xl border border-slate-800 opacity-60 hover:opacity-100 transition cursor-pointer flex flex-col justify-between h-56 relative group">
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl">🏢</span>
+                        <span id="status-lvl-2" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">🔒 Terkunci</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-cyan-400 font-extrabold uppercase">LEVEL 2</span>
+                        <h3 class="font-bold text-slate-100 text-sm">Kota Translasi</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Restorasi kawasan bangunan kota</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">⭐ <span id="stars-lvl-2">0/3</span></span>
+                        <i id="icon-lvl-2" class="fa-solid fa-lock text-slate-500"></i>
+                    </div>
+                </div>
+
+                <!-- Level 3 Node -->
+                <div id="level-node-3" onclick="selectLevel(3)" class="glass-panel p-5 rounded-2xl border border-slate-800 opacity-60 hover:opacity-100 transition cursor-pointer flex flex-col justify-between h-56 relative group">
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl">🪞</span>
+                        <span id="status-lvl-3" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">🔒 Terkunci</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-pink-400 font-extrabold uppercase">LEVEL 3</span>
+                        <h3 class="font-bold text-slate-100 text-sm">Kota Cermin</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Refleksi Sumbu-X & Sumbu-Y</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">⭐ <span id="stars-lvl-3">0/3</span></span>
+                        <i id="icon-lvl-3" class="fa-solid fa-lock text-slate-500"></i>
+                    </div>
+                </div>
+
+                <!-- Level 4 Node -->
+                <div id="level-node-4" onclick="selectLevel(4)" class="glass-panel p-5 rounded-2xl border border-slate-800 opacity-60 hover:opacity-100 transition cursor-pointer flex flex-col justify-between h-56 relative group">
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl">🌆</span>
+                        <span id="status-lvl-4" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">🔒 Terkunci</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-purple-400 font-extrabold uppercase">LEVEL 4</span>
+                        <h3 class="font-bold text-slate-100 text-sm">Kota Transformasi</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Kombinasi Translasi & Refleksi</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">⭐ <span id="stars-lvl-4">0/3</span></span>
+                        <i id="icon-lvl-4" class="fa-solid fa-lock text-slate-500"></i>
+                    </div>
+                </div>
+
+                <!-- Level 5 Node -->
+                <div id="level-node-5" onclick="selectLevel(5)" class="glass-panel p-5 rounded-2xl border border-amber-500/30 opacity-60 hover:opacity-100 transition cursor-pointer flex flex-col justify-between h-56 relative group">
+                    <div class="flex justify-between items-center">
+                        <span class="text-3xl">👑</span>
+                        <span id="status-lvl-5" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold">🔒 Terkunci</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-amber-400 font-extrabold uppercase">LEVEL 5</span>
+                        <h3 class="font-bold text-slate-100 text-sm">Arsitek Master</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Final Boss Restore Metropolis</p>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">⭐ <span id="stars-lvl-5">0/5</span></span>
+                        <i id="icon-lvl-5" class="fa-solid fa-lock text-slate-500"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. VIEW GAMEPLAY ENGINE (INTERACTIVE CANVAS & HUD) -->
+        <section id="view-gameplay" class="view-section hidden space-y-4">
+            <!-- Top Mission Progress Header Bar -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span id="game-level-icon" class="text-3xl">🏠</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="game-level-title" class="text-[11px] font-black text-cyan-400 uppercase tracking-wider">LEVEL 1</span>
+                            <span id="game-progress-tag" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">MISI 1 / 5</span>
+                        </div>
+                        <h3 id="game-mission-title" class="font-extrabold text-slate-100 text-sm">Geser Rumah 2 Satuan ke Kanan</h3>
+                    </div>
+                </div>
+
+                <!-- Game Utility Toolbar -->
+                <div class="flex items-center gap-2">
+                    <button onclick="zoomCanvas(1.1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Zoom In">🔍+</button>
+                    <button onclick="zoomCanvas(0.9)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Zoom Out">🔎-</button>
+                    <button onclick="resetCanvasView()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs" title="Reset Tampilan View">↺</button>
+                    <button onclick="toggleCoordinatesDisplay()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold">🎯 HUD Koordinat</button>
+                    <button onclick="useHint()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1">
+                        💡 Petunjuk (-20)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workspace Canvas Grid and Controls -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+                
+                <!-- Main Canvas Interactive Box -->
+                <div class="lg:col-span-2 glass-panel p-4 rounded-3xl border border-cyan-500/20 flex flex-col items-center relative overflow-hidden">
+                    
+                    <!-- Floating Coordinates Readout -->
+                    <div id="float-coord-hud" class="absolute top-6 left-6 z-20 glass-panel px-3.5 py-2 rounded-xl border border-cyan-500/40 text-xs font-mono glow-active">
+                        <div class="text-[10px] text-slate-400 font-sans uppercase">OBJEK TERPILIH:</div>
+                        <div id="hud-pos-text" class="text-cyan-300 font-extrabold text-sm">Posisi: (0, 0)</div>
+                        <div id="hud-vertices-text" class="text-[10px] text-slate-400 mt-0.5 font-mono">Titik Sudut: A(0,0)</div>
+                    </div>
+
+                    <!-- Canvas -->
+                    <div class="w-full flex justify-center items-center py-2">
+                        <canvas id="game-canvas" width="560" height="560" class="rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl max-w-full h-auto"></canvas>
+                    </div>
+
+                    <div class="w-full flex justify-between items-center px-2 pt-2 text-[11px] text-slate-400">
+                        <span>💡 <strong class="text-slate-200">Drag & Drop:</strong> Seret objek dengan mouse/sentuhan ke titik target grid.</span>
+                        <span class="text-cyan-400 font-mono">Grid: [-10, 10]</span>
+                    </div>
+                </div>
+
+                <!-- Right Side Control Panel & Verification -->
+                <div class="glass-panel p-5 rounded-3xl space-y-4 border border-slate-800">
+                    <div class="border-b border-slate-800 pb-3">
+                        <h4 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-cyan-400"></i> INSTRUKSI MISI
+                        </h4>
+                        <p id="mission-instruction-text" class="text-xs text-slate-300 mt-2 leading-relaxed">
+                            Geser objek dari posisi awal menuju target koordinat.
+                        </p>
+                    </div>
+
+                    <!-- Math Target Formula Box -->
+                    <div id="formula-box" class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 text-xs font-mono space-y-1">
+                        <span class="text-slate-400 text-[10px] uppercase font-sans">Transformasi Matematika:</span>
+                        <p id="formula-text" class="text-cyan-300 font-bold text-sm">$A(x,y) \rightarrow A'(x+2, y)$</p>
+                    </div>
+
+                    <!-- Level 3 & 4 Cerminkan Objek Feature Button -->
+                    <div id="mirror-mode-box" class="hidden bg-slate-900/80 p-3 rounded-2xl border border-pink-500/30 space-y-2">
+                        <p class="text-[11px] text-pink-300 font-bold flex items-center gap-1">
+                            🪞 FITUR CERMINKAN OBJEK
+                        </p>
+                        <p class="text-[10px] text-slate-400">Gunakan tombol ini untuk memunculkan bayangan cermin otomatis, lalu sesuaikan koordinatnya!</p>
+                        <button onclick="triggerAutoMirror()" class="w-full py-2 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 font-bold text-xs border border-pink-500/40 transition">
+                            ✨ Pantulkan Cermin Otomatis
+                        </button>
+                    </div>
+
+                    <!-- Interactive Animation Controls -->
+                    <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 space-y-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">KONTROL ANIMASI SIMULASI:</span>
+                        <div class="flex gap-2">
+                            <button onclick="runTransformationAnimation()" class="flex-1 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-xs border border-cyan-500/30 transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-play text-[10px]"></i> Jalankan Animasi
+                            </button>
+                            <button onclick="resetCurrentMission()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+                                ↺ Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Alert Box -->
+                    <div id="feedback-box" class="hidden p-3.5 rounded-2xl text-xs space-y-1 transition-all">
+                        <p id="feedback-status" class="font-bold"></p>
+                        <p id="feedback-detail" class="text-slate-300 text-[11px]"></p>
+                    </div>
+
+                    <!-- Action Check Button -->
+                    <div class="pt-2">
+                        <button onclick="checkMissionAnswer()" id="btn-submit-mission" class="w-full btn-cyber text-slate-950 font-black py-3.5 rounded-xl text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> VERIFIKASI POSISI OBJEK
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 8. VIEW BADGES / PENCAPAIAN -->
+        <section id="view-badges" class="view-section hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">🏆 GALERI BADGE ARSITEK</h2>
+                    <p class="text-xs text-slate-400">Lencana Penghargaan Kompetensi Geometri</p>
+                </div>
+                <button onclick="showView('home')" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold">Kembali</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="badge-gallery">
+                <!-- JS Generated Badges -->
+            </div>
+        </section>
+
+        <!-- 9. VIEW PAPAN SKOR -->
+        <section id="view-leaderboard" class="view-section hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📊 PAPAN SKOR ARSITEK KOTA</h2>
+                    <p class="text-xs text-slate-400">Peringkat Prestasi Belajar Murid</p>
+                </div>
+                <button onclick="showView('home')" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold">Kembali</button>
+            </div>
+
+            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/90 text-cyan-400 font-bold uppercase border-b border-slate-800">
+                            <tr>
+                                <th class="p-4">Peringkat</th>
+                                <th class="p-4">Nama Murid</th>
+                                <th class="p-4">Skor Gim</th>
+                                <th class="p-4">Total XP</th>
+                                <th class="p-4">Gelar Arsitek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-table-body" class="divide-y divide-slate-800/50">
+                            <!-- JS Generated Leaderboard -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. VIEW EVALUASI 10 SOAL -->
+        <section id="view-evaluation" class="view-section hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-6 border border-slate-800">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-2">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">📝 EVALUASI PEMAHAMAN MATERI</h2>
+                        <p class="text-xs text-slate-400">10 Soal Uji Kompetensi Translasi & Refleksi (KKM: 80)</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30">
+                            Soal <span id="quiz-current-num">1</span> dari 10
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Quiz Progress Bar -->
+                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                    <div id="quiz-progress-bar" class="bg-gradient-to-r from-cyan-500 to-pink-500 h-full w-10/100 transition-all duration-300"></div>
+                </div>
+
+                <!-- Question Box -->
+                <div class="space-y-4">
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-2">
+                        <span id="quiz-level-tag" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 uppercase">C2 - Pemahaman</span>
+                        <h3 id="quiz-question-text" class="text-sm sm:text-base font-semibold text-slate-100 mt-2">
+                            Soal...
+                        </h3>
+                    </div>
+
+                    <!-- Options List -->
+                    <div id="quiz-options-container" class="space-y-2">
+                        <!-- Options JS rendered -->
+                    </div>
+                </div>
+
+                <!-- Quiz Navigation -->
+                <div class="flex justify-between items-center pt-4">
+                    <button onclick="prevQuizQuestion()" id="btn-quiz-prev" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-semibold disabled:opacity-40">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Sebelumnya
+                    </button>
+                    <button onclick="nextQuizQuestion()" id="btn-quiz-next" class="btn-cyber text-slate-950 px-6 py-2.5 rounded-xl text-xs font-bold">
+                        Selanjutnya <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. VIEW HASIL EVALUASI -->
+        <section id="view-eval-result" class="view-section hidden space-y-6">
+            <div class="glass-panel-glow p-8 rounded-3xl text-center space-y-6 max-w-2xl mx-auto border border-cyan-500/30">
+                <div class="w-20 h-20 mx-auto rounded-full bg-cyan-500/20 flex items-center justify-center text-4xl shadow-xl shadow-cyan-500/20">
+                    🏆
+                </div>
+                
+                <div>
+                    <h2 class="text-3xl font-black text-white">HASIL EVALUASI AKHIR</h2>
+                    <p class="text-xs text-slate-400 mt-1">Nama Murid: <strong id="res-student-name" class="text-cyan-300">...</strong></p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-xs block">Nilai Evaluasi</span>
+                        <span id="res-score-num" class="text-3xl font-black text-cyan-400">0</span>
+                        <span class="text-[10px] text-slate-500 block">/ 100</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-xs block">Jawaban Benar</span>
+                        <span id="res-correct-num" class="text-2xl font-extrabold text-green-400">0</span>
+                        <span class="text-[10px] text-slate-500 block">Soal</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-xs block">Status KKM (80)</span>
+                        <span id="res-status-badge" class="text-xs font-bold px-2 py-1 rounded-full bg-slate-800 text-slate-300 block mt-2">...</span>
+                    </div>
+                </div>
+
+                <div id="res-feedback-text" class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                    ...
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-3 pt-4">
+                    <button onclick="showView('discussion')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                        📖 Lihat Pembahasan Soal
+                    </button>
+                    <button onclick="restartEvaluation()" class="px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-xs border border-cyan-500/30 transition">
+                        🔄 Ulangi Evaluasi
+                    </button>
+                    <button onclick="showView('home')" class="btn-cyber text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs">
+                        🏠 Beranda
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 12. VIEW PEMBAHASAN SOAL -->
+        <section id="view-discussion" class="view-section hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📖 PEMBAHASAN SOAL EVALUASI</h2>
+                    <p class="text-xs text-slate-400">Kunci Jawaban dan Penjelasan Lengkap 10 Soal</p>
+                </div>
+                <button onclick="showView('eval-result')" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold">Kembali ke Hasil</button>
+            </div>
+
+            <div id="discussion-list" class="space-y-4">
+                <!-- JS Rendered Discussions -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MISSION COMPLETE MODAL SUMMARY -->
+    <div id="modal-mission-complete" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md hidden p-4">
+        <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-5 border border-cyan-500/40">
+            <div class="w-16 h-16 mx-auto rounded-full bg-cyan-500/20 flex items-center justify-center text-3xl">
+                🎉
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-black text-white">MISI SELESAI!</h3>
+                <p id="modal-mission-subtext" class="text-xs text-cyan-300 mt-1">Posisi Bangunan Berhasil Direstorasi</p>
+            </div>
+
+            <!-- Star Rating Display -->
+            <div id="modal-stars-container" class="flex justify-center gap-2 text-3xl">
+                <span class="text-yellow-400">⭐</span>
+                <span class="text-yellow-400">⭐</span>
+                <span class="text-yellow-400">⭐</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Bonus Skor:</span>
+                    <span id="modal-score-add" class="text-amber-300 font-extrabold text-lg">+100 Poin</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Bonus XP:</span>
+                    <span id="modal-xp-add" class="text-yellow-400 font-extrabold text-lg">+50 XP</span>
+                </div>
+            </div>
+
+            <button onclick="proceedToNextMission()" class="w-full btn-cyber text-slate-950 font-black py-3.5 rounded-xl text-xs tracking-wider uppercase">
+                ➡️ LANJUT KE MISI BERIKUTNYA
+            </button>
+        </div>
+    </div>
+
+    <!-- REGISTRATION MODAL -->
+    <div id="modal-registration" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md hidden p-4">
+        <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-md w-full space-y-5 border border-cyan-500/30">
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-900 border border-cyan-500/40 p-1 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <img src="https://i.ibb.co.com/sJjrLYY7/Chat-GPT-Image-13-Sep-2026-20-22-18.png" alt="Registration Icon" class="w-full h-full object-cover rounded-xl">
+                </div>
+                <h3 class="text-xl font-bold text-white">MASUK KE KOTA SIMETRI</h3>
+                <p class="text-xs text-slate-400">Masukkan nama untuk mencatat lisensi Arsitek Transformasi</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-300">Nama Murid:</label>
+                <input type="text" id="input-student-name" placeholder="Contoh: Budi Pratama" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 transition">
+            </div>
+
+            <button onclick="saveStudentName()" class="w-full btn-cyber text-slate-950 font-bold py-3.5 rounded-xl text-xs">
+                MASUK KE KOTA <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-slate-900 py-4 px-6 text-center text-xs text-slate-400 mt-8 relative z-10">
+        <div class="container mx-auto space-y-1">
+            <p class="font-bold text-slate-300">KOTA SIMETRI — Gim Pembelajaran Transformasi Geometri</p>
+            <p>Matematika Kelas IX SMP | Guru Pengampu: <span class="text-cyan-400 font-semibold">Dian Agustin Sulittia, S.Pd.</span></p>
+        </div>
+    </footer>
+
+    <!-- MAIN JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        // --- GAME STATE PERSISTENCE ---
+        let gameState = {
+            studentName: "Murid IX",
+            score: 0,
+            xp: 0,
+            lives: 3,
+            currentLevel: 1,
+            currentMissionIndex: 0,
+            unlockedLevels: [1],
+            completedLevels: [],
+            stars: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            badges: [],
+            evalAnswers: new Array(10).fill(null),
+            soundEnabled: true
+        };
+
+        // --- AUDIO ENGINE (Web Audio API Synthesizer) ---
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(450, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.setValueAtTime(110, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const btn = document.getElementById('btn-audio');
+            btn.innerHTML = gameState.soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+            btn.classList.toggle('text-red-400', !gameState.soundEnabled);
+        }
+
+        // --- LOADING SCREEN SIMULATION ENGINE ---
+        function runLoadingScreenAnimation() {
+            const bar = document.getElementById('loading-bar');
+            const percent = document.getElementById('loading-percent');
+            const statusText = document.getElementById('loading-text');
+            const screen = document.getElementById('loading-screen');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 15) + 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        screen.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => screen.remove(), 700);
+                    }, 400);
+                }
+                bar.style.width = `${progress}%`;
+                percent.textContent = `${progress}%`;
+                if (progress > 30 && progress < 70) {
+                    statusText.textContent = "Menyiapkan Bidang Kartesius...";
+                } else if (progress >= 70) {
+                    statusText.textContent = "Restorasi Kota Simetri Siap!";
+                }
+            }, 120);
+        }
+
+        // --- LEVEL MISSIONS DATA DEFINITION ---
+        const MISSIONS_DATA = {
+            1: [
+                {
+                    title: "Pergeseran Rumah Ke Kanan",
+                    instruction: "Geser Rumah A(1,2) sejauh 2 satuan ke kanan.",
+                    startPos: { x: 1, y: 2 },
+                    targetPos: { x: 3, y: 2 },
+                    formula: "$A(1,2) \\xrightarrow{T(2,0)} A'(1+2, 2) = A'(3,2)$",
+                    shape: "house",
+                    hints: ["Bergerak ke kanan berarti menambah nilai koordinat X sebesar +2.", "Target posisi akhir adalah (3, 2)."]
+                },
+                {
+                    title: "Pergeseran Rumah Ke Kiri",
+                    instruction: "Geser Rumah B(3,1) sejauh 3 satuan ke kiri.",
+                    startPos: { x: 3, y: 1 },
+                    targetPos: { x: 0, y: 1 },
+                    formula: "$B(3,1) \\xrightarrow{T(-3,0)} B'(3-3, 1) = B'(0,1)$",
+                    shape: "house",
+                    hints: ["Bergerak ke kiri berarti mengurangi nilai koordinat X sebesar -3.", "Target posisi akhir adalah (0, 1)."]
+                },
+                {
+                    title: "Pergeseran Taman Ke Atas",
+                    instruction: "Geser Taman C(-2,-1) sejauh 2 satuan ke atas.",
+                    startPos: { x: -2, y: -1 },
+                    targetPos: { x: -2, y: 1 },
+                    formula: "$C(-2,-1) \\xrightarrow{T(0,2)} C'(-2, -1+2) = C'(-2,1)$",
+                    shape: "park",
+                    hints: ["Bergerak ke atas berarti menambah nilai koordinat Y sebesar +2.", "Target posisi akhir adalah (-2, 1)."]
+                },
+                {
+                    title: "Pergeseran Titik Ke Bawah",
+                    instruction: "Geser Pohon D(2,3) sejauh 3 satuan ke bawah.",
+                    startPos: { x: 2, y: 3 },
+                    targetPos: { x: 2, y: 0 },
+                    formula: "$D(2,3) \\xrightarrow{T(0,-3)} D'(2, 3-3) = D'(2,0)$",
+                    shape: "tree",
+                    hints: ["Bergerak ke bawah berarti mengurangi nilai koordinat Y sebesar -3.", "Target posisi akhir adalah (2, 0)."]
+                },
+                {
+                    title: "Translasi Gabungan Kanan & Atas",
+                    instruction: "Geser Bangunan E(-3,-2) sejauh 4 satuan ke kanan dan 3 satuan ke atas.",
+                    startPos: { x: -3, y: -2 },
+                    targetPos: { x: 1, y: 1 },
+                    formula: "$E(-3,-2) \\xrightarrow{T(4,3)} E'(-3+4, -2+3) = E'(1,1)$",
+                    shape: "building",
+                    hints: ["Hitung pergeseran X = -3 + 4 = 1, dan Y = -2 + 3 = 1.", "Target posisi akhir adalah (1, 1)."]
+                }
+            ],
+            2: [
+                {
+                    title: "Zona Pendidikan Sekolah",
+                    instruction: "Pindahkan Sekolah dari (-4,-1) ke zona pendidikan baru dengan translasi T(5,3).",
+                    startPos: { x: -4, y: -1 },
+                    targetPos: { x: 1, y: 2 },
+                    formula: "$\\text{Sekolah}(-4,-1) \\xrightarrow{T(5,3)} \\text{Sekolah}'(1,2)$",
+                    shape: "school",
+                    hints: ["X = -4 + 5 = 1, Y = -1 + 3 = 2.", "Pindahkan sekolah menuju koordinat (1, 2)."]
+                },
+                {
+                    title: "Restorasi Taman Kota",
+                    instruction: "Geser Taman Kota dari (2,4) sejauh 3 satuan ke kiri dan 2 satuan ke bawah.",
+                    startPos: { x: 2, y: 4 },
+                    targetPos: { x: -1, y: 2 },
+                    formula: "$\\text{Taman}(2,4) \\xrightarrow{T(-3,-2)} \\text{Taman}'(-1,2)$",
+                    shape: "park",
+                    hints: ["Kurangi X sebesar 3 dan Y sebesar 2.", "Target posisi akhir adalah (-1, 2)."]
+                },
+                {
+                    title: "Penataan Gedung Perkantoran",
+                    instruction: "Geser Gedung dari (-2,3) oleh translasi T(4,-4).",
+                    startPos: { x: -2, y: 3 },
+                    targetPos: { x: 2, y: -1 },
+                    formula: "$\\text{Gedung}(-2,3) \\xrightarrow{T(4,-4)} \\text{Gedung}'(2,-1)$",
+                    shape: "building",
+                    hints: ["Geser 4 ke kanan dan 4 ke bawah.", "Target posisi akhir adalah (2, -1)."]
+                }
+            ],
+            3: [
+                {
+                    title: "Pencerminan Sumbu-X",
+                    instruction: "Pantulkan Rumah A(3,4) terhadap Sumbu-X.",
+                    startPos: { x: 3, y: 4 },
+                    targetPos: { x: 3, y: -4 },
+                    formula: "$A(3,4) \\xrightarrow{\\text{Sumbu-X}} A'(3,-4)$",
+                    shape: "house",
+                    mirrorLine: 'X',
+                    hints: ["Refleksi terhadap Sumbu-X membuat nilai X tetap, dan tanda Y berubah.", "Target bayangan adalah (3, -4)."]
+                },
+                {
+                    title: "Pencerminan Sumbu-Y",
+                    instruction: "Pantulkan Gedung B(4,2) terhadap Sumbu-Y.",
+                    startPos: { x: 4, y: 2 },
+                    targetPos: { x: -4, y: 2 },
+                    formula: "$B(4,2) \\xrightarrow{\\text{Sumbu-Y}} B'(-4,2)$",
+                    shape: "building",
+                    mirrorLine: 'Y',
+                    hints: ["Refleksi terhadap Sumbu-Y membuat nilai Y tetap, dan tanda X berubah.", "Target bayangan adalah (-4, 2)."]
+                },
+                {
+                    title: "Pencerminan Sekolah Sumbu-Y",
+                    instruction: "Pantulkan Sekolah C(-3,-2) terhadap Sumbu-Y.",
+                    startPos: { x: -3, y: -2 },
+                    targetPos: { x: 3, y: -2 },
+                    formula: "$C(-3,-2) \\xrightarrow{\\text{Sumbu-Y}} C'(3,-2)$",
+                    shape: "school",
+                    mirrorLine: 'Y',
+                    hints: ["Sumbu-Y membalik nilai X dari -3 menjadi +3.", "Target bayangan adalah (3, -2)."]
+                }
+            ],
+            4: [
+                {
+                    title: "Translasi lalu Refleksi Sumbu-X",
+                    instruction: "Geser Gedung A(1,2) dengan T(3,1), kemudian pantulkan hasilnya terhadap Sumbu-X.",
+                    startPos: { x: 1, y: 2 },
+                    targetPos: { x: 4, y: -3 },
+                    formula: "$A(1,2) \\xrightarrow{T(3,1)} (4,3) \\xrightarrow{\\text{Sumbu-X}} A'(4,-3)$",
+                    shape: "building",
+                    mirrorLine: 'X',
+                    hints: ["Langkah 1 Translasi: (1+3, 2+1) = (4,3).", "Langkah 2 Refleksi Sumbu-X: (4,-3)."]
+                },
+                {
+                    title: "Refleksi Sumbu-Y lalu Translasi",
+                    instruction: "Pantulkan Rumah B(2,3) terhadap Sumbu-Y, kemudian geser hasilnya 1 satuan ke atas.",
+                    startPos: { x: 2, y: 3 },
+                    targetPos: { x: -2, y: 4 },
+                    formula: "$B(2,3) \\xrightarrow{\\text{Sumbu-Y}} (-2,3) \\xrightarrow{T(0,1)} B'(-2,4)$",
+                    shape: "house",
+                    mirrorLine: 'Y',
+                    hints: ["Refleksi Sumbu-Y: (-2, 3).", "Tambahkan Y + 1: (-2, 4)."]
+                },
+                {
+                    title: "Kombinasi Kompleks Kota",
+                    instruction: "Geser Sekolah C(-2,-1) oleh T(4,-2), lalu pantulkan hasilnya terhadap Sumbu-X.",
+                    startPos: { x: -2, y: -1 },
+                    targetPos: { x: 2, y: 3 },
+                    formula: "$C(-2,-1) \\xrightarrow{T(4,-2)} (2,-3) \\xrightarrow{\\text{Sumbu-X}} C'(2,3)$",
+                    shape: "school",
+                    mirrorLine: 'X',
+                    hints: ["Translasi: (-2+4, -1-2) = (2,-3).", "Refleksi Sumbu-X membalik Y: (2, 3)."]
+                }
+            ],
+            5: [
+                {
+                    title: "👑 Final Restorasi 1: Sektor Rumah",
+                    instruction: "Translasi Rumah (-4,-2) oleh T(5,2).",
+                    startPos: { x: -4, y: -2 },
+                    targetPos: { x: 1, y: 0 },
+                    formula: "$(-4,-2) \\xrightarrow{T(5,2)} (1,0)$",
+                    shape: "house",
+                    hints: ["X = -4 + 5 = 1, Y = -2 + 2 = 0."]
+                },
+                {
+                    title: "👑 Final Restorasi 2: Sektor Gedung",
+                    instruction: "Pantulkan Menara Gedung (3,3) terhadap Sumbu-Y.",
+                    startPos: { x: 3, y: 3 },
+                    targetPos: { x: -3, y: 3 },
+                    formula: "$(3,3) \\xrightarrow{\\text{Sumbu-Y}} (-3,3)$",
+                    shape: "building",
+                    mirrorLine: 'Y',
+                    hints: ["X berubah menjadi -3, Y tetap 3."]
+                },
+                {
+                    title: "👑 Final Restorasi 3: Pusat Metropolis",
+                    instruction: "Geser Sekolah (-2,2) oleh T(4,-1), lalu pantulkan terhadap Sumbu-X.",
+                    startPos: { x: -2, y: 2 },
+                    targetPos: { x: 2, y: -1 },
+                    formula: "$(-2,2) \\xrightarrow{T(4,-1)} (2,1) \\xrightarrow{\\text{Sumbu-X}} (2,-1)$",
+                    shape: "school",
+                    mirrorLine: 'X',
+                    hints: ["Translasi = (2,1). Refleksi Sumbu-X = (2,-1)."]
+                }
+            ]
+        };
+
+        // --- EVALUATION QUIZ DATA ---
+        const EVALUATION_QUESTIONS = [
+            {
+                num: 1,
+                levelTag: "C2 - Konsep Translasi",
+                question: "Pengertian translasi dalam geometri bidang adalah...",
+                options: [
+                    "A. Perubahan ukuran bangun tanpa merubah posisi",
+                    "B. Perpindahan posisi objek dengan jarak dan arah tertentu",
+                    "C. Pencerminan objek terhadap suatu garis lurus",
+                    "D. Perputaran objek terhadap titik pusat"
+                ],
+                answer: 1,
+                explanation: "Translasi adalah pergeseran setiap titik suatu objek pada bidang dengan arah dan jarak tertentu tanpa merubah bentuk, ukuran, dan orientasi."
+            },
+            {
+                num: 2,
+                levelTag: "C2 - Vektor Translasi",
+                question: "Titik $A(2,3)$ ditranslasi 4 satuan ke kanan dan 2 satuan ke atas. Koordinat bayangan $A'$ adalah...",
+                options: [
+                    "A. (6, 5)",
+                    "B. (-2, 5)",
+                    "C. (6, 1)",
+                    "D. (2, 5)"
+                ],
+                answer: 0,
+                explanation: "Ke kanan berarti $+4$ pada X, ke atas berarti $+2$ pada Y. $A'(2+4, 3+2) = A'(6,5)$."
+            },
+            {
+                num: 3,
+                levelTag: "C3 - Hitungan Translasi",
+                question: "Titik $B(-3,4)$ ditranslasi oleh $T(5,-2)$. Koordinat bayangan $B'$ adalah...",
+                options: [
+                    "A. (2, 2)",
+                    "B. (-8, 6)",
+                    "C. (2, 6)",
+                    "D. (-8, 2)"
+                ],
+                answer: 0,
+                explanation: "$B'(-3+5, 4+(-2)) = B'(2, 2)$."
+            },
+            {
+                num: 4,
+                levelTag: "C2 - Sifat Refleksi Sumbu-X",
+                question: "Pernyataan yang benar mengenai refleksi terhadap Sumbu-X adalah...",
+                options: [
+                    "A. Nilai X berubah tanda, nilai Y tetap",
+                    "B. Nilai Y berubah tanda, nilai X tetap",
+                    "C. Kedua nilai X dan Y berubah tanda",
+                    "D. Nilai X dan Y bertukar posisi"
+                ],
+                answer: 1,
+                explanation: "Pencerminan terhadap Sumbu-X mempertahankan nilai absis (X) dan membalikkan nilai ordinat (Y) yaitu $(x,y) \\rightarrow (x,-y)$."
+            },
+            {
+                num: 5,
+                levelTag: "C3 - Refleksi Sumbu-X",
+                question: "Titik $C(5,-3)$ direfleksikan terhadap Sumbu-X. Koordinat bayangannya adalah...",
+                options: [
+                    "A. (5, 3)",
+                    "B. (-5, -3)",
+                    "C. (-5, 3)",
+                    "D. (-3, 5)"
+                ],
+                answer: 0,
+                explanation: "$(x,y) \\rightarrow (x,-y)$. Maka $C(5,-3) \\rightarrow C'(5, -(-3)) = C'(5,3)$."
+            },
+            {
+                num: 6,
+                levelTag: "C3 - Refleksi Sumbu-Y",
+                question: "Titik $D(-4,2)$ direfleksikan terhadap Sumbu-Y. Koordinat bayangannya adalah...",
+                options: [
+                    "A. (4, 2)",
+                    "B. (-4, -2)",
+                    "C. (4, -2)",
+                    "D. (2, -4)"
+                ],
+                answer: 0,
+                explanation: "$(x,y) \\rightarrow (-x,y)$. Maka $D(-4,2) \\rightarrow D'(4, 2)$."
+            },
+            {
+                num: 7,
+                levelTag: "C4 - Komposisi Transformasi",
+                question: "Titik $E(1,2)$ ditranslasi $T(3,1)$ kemudian direfleksikan terhadap Sumbu-X. Koordinat akhir $E''$ adalah...",
+                options: [
+                    "A. (4, -3)",
+                    "B. (4, 3)",
+                    "C. (-4, 3)",
+                    "D. (-4, -3)"
+                ],
+                answer: 0,
+                explanation: "Langkah 1 Translasi: $(1+3, 2+1) = (4,3)$. Langkah 2 Refleksi Sumbu-X: $(4,-3)$."
+            },
+            {
+                num: 8,
+                levelTag: "C4 - Analisis Bangun Datar",
+                question: "Persegi panjang dengan titik sudut $A(1,1), B(3,1), C(3,3), D(1,3)$ ditranslasi $T(2,0)$. Koordinat titik $A'$ adalah...",
+                options: [
+                    "A. (3, 1)",
+                    "B. (1, 3)",
+                    "C. (3, 3)",
+                    "D. (5, 1)"
+                ],
+                answer: 0,
+                explanation: "Titik $A(1,1)$ ditranslasi $T(2,0)$ menjadi $A'(1+2, 1+0) = A'(3,1)$."
+            },
+            {
+                num: 9,
+                levelTag: "C4 - Aplikasi Tata Kota",
+                question: "Satu sisi gedung berada di $P(3,2)$. Untuk membuat twin tower simetris di seberang jalan utama (Sumbu-Y), koordinat gedung pasangan adalah...",
+                options: [
+                    "A. (-3, 2)",
+                    "B. (3, -2)",
+                    "C. (-3, -2)",
+                    "D. (2, 3)"
+                ],
+                answer: 0,
+                explanation: "Pencerminan terhadap jalan utama (Sumbu-Y): $P(3,2) \\rightarrow P'(-3,2)$."
+            },
+            {
+                num: 10,
+                levelTag: "C4 - Evaluasi Akhir",
+                question: "Suatu bangunan di $Q(-2,-3)$ direfleksikan terhadap Sumbu-Y lalu ditranslasi $T(1,4)$. Posisi akhir bangunan adalah...",
+                options: [
+                    "A. (3, 1)",
+                    "B. (-1, 1)",
+                    "C. (3, -7)",
+                    "D. (-3, 1)"
+                ],
+                answer: 0,
+                explanation: "Langkah 1 Refleksi Sumbu-Y: $Q(-2,-3) \\rightarrow (2,-3)$. Langkah 2 Translasi $T(1,4)$: $(2+1, -3+4) = (3,1)$."
+            }
+        ];
+
+        // --- BADGES GALLERY DEFINITION ---
+        const BADGES_LIST = [
+            { id: 'trans', name: '📐 PERINTIS TRANSLASI', desc: 'Menyelesaikan seluruh tantangan pergeseran Level 1 & 2', icon: '📐' },
+            { id: 'mirror', name: '🪞 MASTER PENCERMINAN', desc: 'Menyelesaikan tantangan cermin simetris Level 3', icon: '🪞' },
+            { id: 'builder', name: '🏗️ ARSITEK METROPOLIS', desc: 'Menyelesaikan tantangan kombinasi Level 4', icon: '🏗️' },
+            { id: 'boss', name: '👑 MASTER ARSITEK KOTA', desc: 'Menyelesaikan Final Boss Level 5 Kota Simetri', icon: '👑' },
+            { id: 'perfect', name: '🎓 LULUS KKM BINTANG 3', desc: 'Mencapai nilai evaluasi ≥ 80 dan mengumpulkan Bintang 3', icon: '🎓' }
+        ];
+
+        let quizCurrentIndex = 0;
+
+        // --- CORE APPLICATION INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            runLoadingScreenAnimation();
+            loadGameState();
+            updateUIPlayerStats();
+            initMateriCanvases();
+        });
+
+        function showView(viewId) {
+            playSound('click');
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+            const targetView = document.getElementById(`view-${viewId}`);
+            if (targetView) targetView.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (viewId === 'gameplay') {
+                initCanvasEngine();
+            } else if (viewId === 'map') {
+                updateMapNodesUI();
+            } else if (viewId === 'badges') {
+                renderBadgesGallery();
+            } else if (viewId === 'leaderboard') {
+                renderLeaderboard();
+            } else if (viewId === 'evaluation') {
+                renderEvaluationQuestion();
+            }
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function openRegistrationModal() {
+            playSound('click');
+            document.getElementById('modal-registration').classList.remove('hidden');
+        }
+
+        function saveStudentName() {
+            const val = document.getElementById('input-student-name').value.trim();
+            if (val) {
+                gameState.studentName = val;
+                saveGameState();
+                updateUIPlayerStats();
+                playSound('success');
+            }
+            document.getElementById('modal-registration').classList.add('hidden');
+            showView('storyline');
+        }
+
+        function saveGameState() {
+            localStorage.setItem('kota_simetri_state_v2', JSON.stringify(gameState));
+        }
+
+        function loadGameState() {
+            const saved = localStorage.getItem('kota_simetri_state_v2');
+            if (saved) {
+                try {
+                    gameState = { ...gameState, ...JSON.parse(saved) };
+                } catch (e) {}
+            }
+        }
+
+        function resetGameState() {
+            if (confirm("⚠️ Apakah kamu yakin ingin mereset seluruh progres permainan?")) {
+                localStorage.removeItem('kota_simetri_state_v2');
+                location.reload();
+            }
+        }
+
+        function updateUIPlayerStats() {
+            document.getElementById('hud-name').textContent = gameState.studentName;
+            document.getElementById('hud-xp').textContent = `${gameState.xp} XP`;
+            document.getElementById('hud-score').textContent = `${gameState.score} Poin`;
+
+            let hearts = "";
+            for (let i = 0; i < gameState.lives; i++) hearts += "❤️";
+            document.getElementById('hud-lives').textContent = hearts;
+
+            document.getElementById('profile-name').textContent = gameState.studentName;
+            document.getElementById('profile-xp').textContent = `${gameState.xp} XP`;
+            document.getElementById('profile-score').textContent = `${gameState.score} Poin`;
+            document.getElementById('profile-lives').textContent = hearts;
+
+            let rank = "🌱 Arsitek Pemula";
+            if (gameState.xp >= 1000) rank = "👑 Master Arsitek Kota";
+            else if (gameState.xp >= 600) rank = "🏙️ Arsitek Utama";
+            else if (gameState.xp >= 300) rank = "🏗️ Perancang Kota";
+            else if (gameState.xp >= 100) rank = "📐 Penjelajah Geometri";
+            document.getElementById('profile-rank').textContent = rank;
+
+            document.getElementById('header-hud').classList.remove('hidden');
+        }
+
+        // --- INTERACTIVE CANVAS ENGINE WITH TOUCH/MOUSE DRAG & DROP ---
+        let canvas, ctx;
+        let scale = 1.0;
+        let isDragging = false;
+        let currentObjectPos = { x: 0, y: 0 };
+        const GRID_RANGE = 10;
+        let stepSize = 25;
+        let isAnimating = false;
+        let animTimer = null;
+
+        function initCanvasEngine() {
+            canvas = document.getElementById('game-canvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+
+            const parentWidth = Math.min(canvas.parentElement.clientWidth - 32, 540);
+            canvas.width = parentWidth;
+            canvas.height = parentWidth;
+            stepSize = (canvas.width / (GRID_RANGE * 2)) * scale;
+
+            const mission = getCurrentMission();
+            currentObjectPos = { ...mission.startPos };
+
+            setupCanvasPointerListeners();
+            drawGridWorkspace();
+            updateMissionUI();
+        }
+
+        function getCurrentMission() {
+            return MISSIONS_DATA[gameState.currentLevel][gameState.currentMissionIndex];
+        }
+
+        function zoomCanvas(factor) {
+            playSound('click');
+            scale = Math.max(0.7, Math.min(1.4, scale * factor));
+            stepSize = (canvas.width / (GRID_RANGE * 2)) * scale;
+            drawGridWorkspace();
+        }
+
+        function resetCanvasView() {
+            playSound('click');
+            scale = 1.0;
+            stepSize = (canvas.width / (GRID_RANGE * 2)) * scale;
+            drawGridWorkspace();
+        }
+
+        function toggleCoordinatesDisplay() {
+            playSound('click');
+            const hud = document.getElementById('float-coord-hud');
+            hud.classList.toggle('hidden');
+        }
+
+        function gridToCanvas(gx, gy) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            return {
+                x: centerX + (gx * stepSize),
+                y: centerY - (gy * stepSize)
+            };
+        }
+
+        function canvasToGrid(cx, cy) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            return {
+                x: Math.round((cx - centerX) / stepSize),
+                y: Math.round((centerY - cy) / stepSize)
+            };
+        }
+
+        function drawGridWorkspace() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Background Grid Lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+
+            for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
+                const x = centerX + (i * stepSize);
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+
+                const y = centerY - (i * stepSize);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Main Axes
+            ctx.lineWidth = 2.5;
+
+            // X-Axis (Cyan)
+            ctx.strokeStyle = '#06b6d4';
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+
+            // Y-Axis (Pink)
+            ctx.strokeStyle = '#ec4899';
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+
+            // Axis Coordinate Numbers
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px monospace';
+            for (let i = -GRID_RANGE; i <= GRID_RANGE; i += 2) {
+                if (i !== 0) {
+                    const pos = gridToCanvas(i, i);
+                    ctx.fillText(i, pos.x - 6, centerY + 14);
+                    ctx.fillText(i, centerX - 18, pos.y + 4);
+                }
+            }
+
+            const mission = getCurrentMission();
+
+            // Mirror Line Indicator
+            if (mission.mirrorLine === 'X') {
+                ctx.strokeStyle = '#ffd700';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY);
+                ctx.lineTo(canvas.width, centerY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (mission.mirrorLine === 'Y') {
+                ctx.strokeStyle = '#ffd700';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(centerX, 0);
+                ctx.lineTo(centerX, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Target Position Ghost Outline
+            const targetCanvas = gridToCanvas(mission.targetPos.x, mission.targetPos.y);
+            drawBuildingShape(targetCanvas.x, targetCanvas.y, mission.shape, '#334155', true);
+
+            // Active Interactive Object
+            const activeCanvas = gridToCanvas(currentObjectPos.x, currentObjectPos.y);
+            drawBuildingShape(activeCanvas.x, activeCanvas.y, mission.shape, '#00f0ff', false);
+
+            // Real-time HUD Text Update
+            document.getElementById('hud-pos-text').textContent = `Posisi: (${currentObjectPos.x}, ${currentObjectPos.y})`;
+            document.getElementById('hud-vertices-text').textContent = getVerticesText(currentObjectPos, mission.shape);
+        }
+
+        function getVerticesText(pos, shape) {
+            if (shape === 'house' || shape === 'school') {
+                return `Sudut: A(${pos.x-1}, ${pos.y-1}), B(${pos.x+1}, ${pos.y-1}), C(${pos.x}, ${pos.y+1})`;
+            } else if (shape === 'building') {
+                return `Sudut: A(${pos.x-1}, ${pos.y-1}), B(${pos.x+1}, ${pos.y-1}), C(${pos.x+1}, ${pos.y+1}), D(${pos.x-1}, ${pos.y+1})`;
+            }
+            return `Titik: A(${pos.x}, ${pos.y})`;
+        }
+
+        function drawBuildingShape(cx, cy, type, color, isGhost) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.strokeStyle = isGhost ? '#64748b' : '#ffffff';
+            ctx.lineWidth = isGhost ? 1.5 : 2.5;
+            if (isGhost) ctx.setLineDash([4, 4]);
+
+            if (type === 'tree') {
+                ctx.beginPath();
+                ctx.arc(cx, cy - 8, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillRect(cx - 3, cy - 8, 6, 16);
+            } else if (type === 'house') {
+                ctx.fillRect(cx - 14, cy - 6, 28, 20);
+                ctx.strokeRect(cx - 14, cy - 6, 28, 20);
+                ctx.beginPath();
+                ctx.moveTo(cx - 18, cy - 6);
+                ctx.lineTo(cx, cy - 22);
+                ctx.lineTo(cx + 18, cy - 6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type === 'building') {
+                ctx.fillRect(cx - 12, cy - 22, 24, 44);
+                ctx.strokeRect(cx - 12, cy - 22, 24, 44);
+            } else if (type === 'school') {
+                ctx.fillRect(cx - 20, cy - 10, 40, 24);
+                ctx.strokeRect(cx - 20, cy - 10, 40, 24);
+                ctx.beginPath();
+                ctx.moveTo(cx - 22, cy - 10);
+                ctx.lineTo(cx, cy - 22);
+                ctx.lineTo(cx + 22, cy - 10);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else if (type === 'park') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 18);
+                ctx.lineTo(cx - 18, cy + 14);
+                ctx.lineTo(cx + 18, cy + 14);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function setupCanvasPointerListeners() {
+            if (!canvas) return;
+
+            const handlePointerDown = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                const pos = canvasToGrid(clientX - rect.left, clientY - rect.top);
+
+                if (Math.abs(pos.x - currentObjectPos.x) <= 2 && Math.abs(pos.y - currentObjectPos.y) <= 2) {
+                    isDragging = true;
+                }
+            };
+
+            const handlePointerMove = (e) => {
+                if (!isDragging) return;
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                const gridPos = canvasToGrid(clientX - rect.left, clientY - rect.top);
+
+                currentObjectPos.x = Math.max(-GRID_RANGE, Math.min(GRID_RANGE, gridPos.x));
+                currentObjectPos.y = Math.max(-GRID_RANGE, Math.min(GRID_RANGE, gridPos.y));
+                drawGridWorkspace();
+            };
+
+            const handlePointerUp = () => {
+                if (isDragging) playSound('click');
+                isDragging = false;
+            };
+
+            canvas.onmousedown = handlePointerDown;
+            canvas.onmousemove = handlePointerMove;
+            window.onmouseup = handlePointerUp;
+
+            canvas.ontouchstart = handlePointerDown;
+            canvas.ontouchmove = handlePointerMove;
+            window.ontouchend = handlePointerUp;
+        }
+
+        function updateMissionUI() {
+            const mission = getCurrentMission();
+            document.getElementById('game-level-icon').textContent = getLevelIcon(gameState.currentLevel);
+            document.getElementById('game-level-title').textContent = `LEVEL ${gameState.currentLevel}`;
+            document.getElementById('game-progress-tag').textContent = `MISI ${gameState.currentMissionIndex + 1} / ${MISSIONS_DATA[gameState.currentLevel].length}`;
+            document.getElementById('game-mission-title').textContent = mission.title;
+            document.getElementById('mission-instruction-text').textContent = mission.instruction;
+            document.getElementById('formula-text').innerHTML = mission.formula;
+
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            const mirrorBox = document.getElementById('mirror-mode-box');
+            if (gameState.currentLevel === 3 || gameState.currentLevel === 4) {
+                mirrorBox.classList.remove('hidden');
+            } else {
+                mirrorBox.classList.add('hidden');
+            }
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function triggerAutoMirror() {
+            playSound('click');
+            const mission = getCurrentMission();
+            if (mission.mirrorLine === 'X') {
+                currentObjectPos.y = -currentObjectPos.y;
+            } else if (mission.mirrorLine === 'Y') {
+                currentObjectPos.x = -currentObjectPos.x;
+            }
+            drawGridWorkspace();
+        }
+
+        function runTransformationAnimation() {
+            playSound('click');
+            if (isAnimating) return;
+            const mission = getCurrentMission();
+            isAnimating = true;
+            let step = 0;
+            const startX = mission.startPos.x;
+            const startY = mission.startPos.y;
+            const targetX = mission.targetPos.x;
+            const targetY = mission.targetPos.y;
+
+            animTimer = setInterval(() => {
+                step += 0.05;
+                if (step >= 1.0) {
+                    step = 1.0;
+                    clearInterval(animTimer);
+                    isAnimating = false;
+                }
+                currentObjectPos.x = Math.round(startX + (targetX - startX) * step);
+                currentObjectPos.y = Math.round(startY + (targetY - startY) * step);
+                drawGridWorkspace();
+            }, 30);
+        }
+
+        function checkMissionAnswer() {
+            const mission = getCurrentMission();
+            const isCorrect = (currentObjectPos.x === mission.targetPos.x && currentObjectPos.y === mission.targetPos.y);
+
+            const feedbackBox = document.getElementById('feedback-box');
+            const statusText = document.getElementById('feedback-status');
+            const detailText = document.getElementById('feedback-detail');
+
+            feedbackBox.classList.remove('hidden', 'bg-green-500/20', 'border-green-500/40', 'bg-red-500/20', 'border-red-500/40');
+
+            if (isCorrect) {
+                playSound('success');
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+
+                feedbackBox.classList.add('bg-green-500/20', 'border', 'border-green-500/40');
+                statusText.className = "font-bold text-green-400";
+                statusText.textContent = "🎉 BENAR! Posisi Bangunan Sangat Presisi!";
+                detailText.textContent = "Kamu mendapatkan +100 Skor & +50 XP!";
+
+                gameState.score += 100;
+                gameState.xp += 50;
+                saveGameState();
+                updateUIPlayerStats();
+
+                setTimeout(() => {
+                    showMissionCompleteModal();
+                }, 800);
+
+            } else {
+                playSound('error');
+                feedbackBox.classList.add('bg-red-500/20', 'border', 'border-red-500/40');
+                statusText.className = "font-bold text-red-400";
+                statusText.textContent = "❌ BELUM TEPAT";
+                detailText.textContent = `Posisi saat ini: (${currentObjectPos.x}, ${currentObjectPos.y}). Target sasaran: (${mission.targetPos.x}, ${mission.targetPos.y}).`;
+
+                gameState.lives--;
+                gameState.score = Math.max(0, gameState.score - 10);
+                saveGameState();
+                updateUIPlayerStats();
+
+                if (gameState.lives <= 0) {
+                    setTimeout(() => {
+                        alert("❤️ Nyawa habis! Mari kita isi ulang nyawa dan periksa kembali petunjuk.");
+                        gameState.lives = 3;
+                        saveGameState();
+                        updateUIPlayerStats();
+                    }, 400);
+                }
+            }
+        }
+
+        function useHint() {
+            playSound('click');
+            const mission = getCurrentMission();
+            gameState.score = Math.max(0, gameState.score - 20);
+            saveGameState();
+            updateUIPlayerStats();
+            alert(`💡 PETUNJUK ARSITEK:\n${mission.hints.join('\n')}`);
+        }
+
+        function resetCurrentMission() {
+            playSound('click');
+            const mission = getCurrentMission();
+            currentObjectPos = { ...mission.startPos };
+            drawGridWorkspace();
+        }
+
+        function showMissionCompleteModal() {
+            const modal = document.getElementById('modal-mission-complete');
+            modal.classList.remove('hidden');
+        }
+
+        function proceedToNextMission() {
+            playSound('click');
+            document.getElementById('modal-mission-complete').classList.add('hidden');
+            const currentLevelMissions = MISSIONS_DATA[gameState.currentLevel];
+
+            if (gameState.currentMissionIndex < currentLevelMissions.length - 1) {
+                gameState.currentMissionIndex++;
+                initCanvasEngine();
+            } else {
+                if (!gameState.completedLevels.includes(gameState.currentLevel)) {
+                    gameState.completedLevels.push(gameState.currentLevel);
+                }
+                const nextLvl = gameState.currentLevel + 1;
+                if (nextLvl <= 5 && !gameState.unlockedLevels.includes(nextLvl)) {
+                    gameState.unlockedLevels.push(nextLvl);
+                }
+                checkBadgeUnlocks();
+                saveGameState();
+
+                if (gameState.currentLevel < 5) {
+                    alert(`🎉 CONGRATULATIONS! Level ${gameState.currentLevel} Selesai!\nWilayah Level ${nextLvl} berhasil terbuka di Peta Kota.`);
+                    showView('map');
+                } else {
+                    alert("🎉 SELAMAT! Kamu telah menyelesaikan seluruh restorasi Kota Simetri!\nMari uji pengetahuanmu pada EVALUASI AKHIR.");
+                    showView('evaluation');
+                }
+            }
+        }
+
+        function selectLevel(lvl) {
+            if (!gameState.unlockedLevels.includes(lvl)) {
+                playSound('error');
+                alert("🔒 Level ini masih terkunci! Selesaikan level sebelumnya di Peta Kota.");
+                return;
+            }
+            gameState.currentLevel = lvl;
+            gameState.currentMissionIndex = 0;
+            showView('gameplay');
+        }
+
+        function updateMapNodesUI() {
+            for (let i = 1; i <= 5; i++) {
+                const node = document.getElementById(`level-node-${i}`);
+                const status = document.getElementById(`status-lvl-${i}`);
+                const icon = document.getElementById(`icon-lvl-${i}`);
+
+                if (gameState.unlockedLevels.includes(i)) {
+                    node.classList.remove('opacity-60');
+                    status.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 font-bold border border-green-500/30";
+                    status.textContent = "🔓 Terbuka";
+                    if (icon) icon.className = "fa-solid fa-arrow-right text-cyan-400";
+                } else {
+                    node.classList.add('opacity-60');
+                    status.className = "text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-bold";
+                    status.textContent = "🔒 Terkunci";
+                    if (icon) icon.className = "fa-solid fa-lock text-slate-500";
+                }
+            }
+        }
+
+        function getLevelIcon(lvl) {
+            const icons = { 1: '🏠', 2: '🏢', 3: '🪞', 4: '🌆', 5: '👑' };
+            return icons[lvl] || '🏙️';
+        }
+
+        // --- MATERI MODULE CANVASES & TAB CONTROL ---
+        function switchMateriTab(tabName) {
+            playSound('click');
+            document.getElementById('materi-tab-translasi').classList.add('hidden');
+            document.getElementById('materi-tab-refleksi').classList.add('hidden');
+            document.getElementById(`materi-tab-${tabName}`).classList.remove('hidden');
+
+            document.getElementById('tab-btn-translasi').className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            document.getElementById('tab-btn-refleksi').className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+
+            if (tabName === 'translasi') {
+                document.getElementById('tab-btn-translasi').className = "px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 transition";
+            } else {
+                document.getElementById('tab-btn-refleksi').className = "px-4 py-2 rounded-xl text-xs font-bold bg-pink-500 text-slate-950 transition";
+            }
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function initMateriCanvases() {
+            drawMateriTranslasiStatic();
+            drawMateriRefleksiStatic('X');
+        }
+
+        function drawMateriTranslasiStatic() {
+            const c = document.getElementById('materi-canvas-translasi');
+            if (!c) return;
+            const ctxM = c.getContext('2d');
+            ctxM.clearRect(0, 0, c.width, c.height);
+
+            // Axes
+            ctxM.strokeStyle = '#334155';
+            ctxM.lineWidth = 1.5;
+            ctxM.beginPath();
+            ctxM.moveTo(150, 0); ctxM.lineTo(150, 240);
+            ctxM.moveTo(0, 120); ctxM.lineTo(300, 120);
+            ctxM.stroke();
+
+            // Original Point (2, 2)
+            ctxM.fillStyle = '#06b6d4';
+            ctxM.beginPath();
+            ctxM.arc(190, 80, 7, 0, Math.PI * 2);
+            ctxM.fill();
+            ctxM.fillStyle = '#ffffff';
+            ctxM.font = '11px sans-serif';
+            ctxM.fillText('A(2,2)', 195, 75);
+        }
+
+        function playMateriTranslasiAnim() {
+            playSound('click');
+            const c = document.getElementById('materi-canvas-translasi');
+            if (!c) return;
+            const ctxM = c.getContext('2d');
+            let t = 0;
+            const anim = setInterval(() => {
+                t += 0.05;
+                if (t >= 1) {
+                    t = 1;
+                    clearInterval(anim);
+                }
+                ctxM.clearRect(0, 0, c.width, c.height);
+                // Axes
+                ctxM.strokeStyle = '#334155'; ctxM.lineWidth = 1.5;
+                ctxM.beginPath();
+                ctxM.moveTo(150, 0); ctxM.lineTo(150, 240);
+                ctxM.moveTo(0, 120); ctxM.lineTo(300, 120);
+                ctxM.stroke();
+
+                // Vector Arrow
+                ctxM.strokeStyle = '#ffd700'; ctxM.lineWidth = 2; ctxM.setLineDash([3, 3]);
+                ctxM.beginPath(); ctxM.moveTo(190, 80); ctxM.lineTo(190 + (60 * t), 80 - (40 * t)); ctxM.stroke();
+                ctxM.setLineDash([]);
+
+                // Original Point
+                ctxM.fillStyle = '#06b6d4'; ctxM.beginPath(); ctxM.arc(190, 80, 5, 0, Math.PI * 2); ctxM.fill();
+                ctxM.fillText('A(2,2)', 170, 95);
+
+                // Moving Point A'
+                ctxM.fillStyle = '#3b82f6'; ctxM.beginPath(); ctxM.arc(190 + (60 * t), 80 - (40 * t), 7, 0, Math.PI * 2); ctxM.fill();
+                if (t === 1) ctxM.fillText("A'(5,4)", 255, 35);
+            }, 30);
+        }
+
+        function drawMateriRefleksiStatic(axis) {
+            const c = document.getElementById('materi-canvas-refleksi');
+            if (!c) return;
+            const ctxM = c.getContext('2d');
+            ctxM.clearRect(0, 0, c.width, c.height);
+
+            ctxM.strokeStyle = '#334155'; ctxM.lineWidth = 1.5;
+            ctxM.beginPath();
+            ctxM.moveTo(150, 0); ctxM.lineTo(150, 240);
+            ctxM.moveTo(0, 120); ctxM.lineTo(300, 120);
+            ctxM.stroke();
+
+            // Point A(3,2)
+            ctxM.fillStyle = '#ec4899'; ctxM.beginPath(); ctxM.arc(210, 80, 7, 0, Math.PI * 2); ctxM.fill();
+            ctxM.fillStyle = '#ffffff'; ctxM.font = '11px sans-serif'; ctxM.fillText('A(3,2)', 215, 75);
+        }
+
+        function playMateriRefleksiAnim(axis) {
+            playSound('click');
+            const c = document.getElementById('materi-canvas-refleksi');
+            if (!c) return;
+            const ctxM = c.getContext('2d');
+            let t = 0;
+            const anim = setInterval(() => {
+                t += 0.05;
+                if (t >= 1) {
+                    t = 1;
+                    clearInterval(anim);
+                }
+                ctxM.clearRect(0, 0, c.width, c.height);
+                ctxM.strokeStyle = '#334155'; ctxM.lineWidth = 1.5;
+                ctxM.beginPath();
+                ctxM.moveTo(150, 0); ctxM.lineTo(150, 240);
+                ctxM.moveTo(0, 120); ctxM.lineTo(300, 120);
+                ctxM.stroke();
+
+                // Highlight Axis
+                ctxM.strokeStyle = '#ffd700'; ctxM.lineWidth = 3;
+                ctxM.beginPath();
+                if (axis === 'X') { ctxM.moveTo(0, 120); ctxM.lineTo(300, 120); }
+                else { ctxM.moveTo(150, 0); ctxM.lineTo(150, 240); }
+                ctxM.stroke();
+
+                // Original Point
+                ctxM.fillStyle = '#ec4899'; ctxM.beginPath(); ctxM.arc(210, 80, 5, 0, Math.PI * 2); ctxM.fill();
+
+                // Mirrored Point
+                let targetX = (axis === 'Y') ? 150 - (60 * t) : 210;
+                let targetY = (axis === 'X') ? 120 + (40 * t) : 80;
+
+                ctxM.fillStyle = '#a855f7'; ctxM.beginPath(); ctxM.arc(targetX, targetY, 7, 0, Math.PI * 2); ctxM.fill();
+            }, 30);
+        }
+
+        // --- EVALUATION QUIZ ENGINE ---
+        function renderEvaluationQuestion() {
+            const q = EVALUATION_QUESTIONS[quizCurrentIndex];
+            document.getElementById('quiz-current-num').textContent = quizCurrentIndex + 1;
+            document.getElementById('quiz-level-tag').textContent = q.levelTag;
+            document.getElementById('quiz-question-text').innerHTML = q.question;
+            document.getElementById('quiz-progress-bar').style.width = `${((quizCurrentIndex + 1) / 10) * 100}%`;
+
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const isSelected = gameState.evalAnswers[quizCurrentIndex] === idx;
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-xl border text-xs font-semibold transition flex items-center justify-between ${
+                    isSelected ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200' : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800'
+                }`;
+                btn.innerHTML = `<span>${opt}</span> ${isSelected ? '<i class="fa-solid fa-circle-check text-cyan-400"></i>' : ''}`;
+                btn.onclick = () => selectQuizAnswer(idx);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('btn-quiz-prev').disabled = (quizCurrentIndex === 0);
+            const nextBtn = document.getElementById('btn-quiz-next');
+            nextBtn.innerHTML = (quizCurrentIndex === 9) ? 'Selesai & Cek Nilai <i class="fa-solid fa-check-double ml-1"></i>' : 'Selanjutnya <i class="fa-solid fa-chevron-right ml-1"></i>';
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function selectQuizAnswer(optionIndex) {
+            playSound('click');
+            gameState.evalAnswers[quizCurrentIndex] = optionIndex;
+            saveGameState();
+            renderEvaluationQuestion();
+        }
+
+        function prevQuizQuestion() {
+            if (quizCurrentIndex > 0) {
+                quizCurrentIndex--;
+                renderEvaluationQuestion();
+            }
+        }
+
+        function nextQuizQuestion() {
+            if (quizCurrentIndex < 9) {
+                quizCurrentIndex++;
+                renderEvaluationQuestion();
+            } else {
+                finishEvaluation();
+            }
+        }
+
+        function finishEvaluation() {
+            playSound('success');
+            let correctCount = 0;
+            EVALUATION_QUESTIONS.forEach((q, idx) => {
+                if (gameState.evalAnswers[idx] === q.answer) correctCount++;
+            });
+
+            const finalScore = correctCount * 10;
+            document.getElementById('res-student-name').textContent = gameState.studentName;
+            document.getElementById('res-score-num').textContent = finalScore;
+            document.getElementById('res-correct-num').textContent = correctCount;
+
+            const badge = document.getElementById('res-status-badge');
+            const feedbackText = document.getElementById('res-feedback-text');
+
+            if (finalScore >= 80) {
+                badge.className = "text-xs font-bold px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 block mt-2";
+                badge.textContent = "LULUS KKM (Tuntas)";
+                feedbackText.innerHTML = `🎉 <strong>Luar Biasa!</strong> Kamu telah menguasai kompetensi dasar Transformasi Geometri (Translasi & Refleksi) dengan sangat baik!`;
+            } else {
+                badge.className = "text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 block mt-2";
+                badge.textContent = "BELUM TUNTAS KKM";
+                feedbackText.innerHTML = `💪 <strong>Tetap Semangat!</strong> Kamu bisa mempelajari kembali modul materi dan mencoba simulasi permainan untuk memperdalam pemahaman.`;
+            }
+
+            renderDiscussionList();
+            checkBadgeUnlocks();
+            showView('eval-result');
+        }
+
+        function restartEvaluation() {
+            gameState.evalAnswers = new Array(10).fill(null);
+            quizCurrentIndex = 0;
+            saveGameState();
+            showView('evaluation');
+        }
+
+        function renderDiscussionList() {
+            const list = document.getElementById('discussion-list');
+            list.innerHTML = '';
+
+            EVALUATION_QUESTIONS.forEach((q, idx) => {
+                const userAns = gameState.evalAnswers[idx];
+                const isCorrect = (userAns === q.answer);
+
+                const item = document.createElement('div');
+                item.className = `glass-panel p-5 rounded-2xl border ${isCorrect ? 'border-green-500/30' : 'border-red-500/30'} space-y-3 text-xs`;
+                item.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold ${isCorrect ? 'text-green-400' : 'text-red-400'}">Soal #${idx + 1} - ${isCorrect ? 'BENAR' : 'SALAH'}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">${q.levelTag}</span>
+                    </div>
+                    <p class="text-slate-200 font-semibold">${q.question}</p>
+                    <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-1">
+                        <p class="text-cyan-300 font-bold">Kunci Jawaban: ${q.options[q.answer]}</p>
+                        <p class="text-slate-400">Jawaban Kamu: ${userAns !== null ? q.options[userAns] : 'Belum Dijawab'}</p>
+                    </div>
+                    <div class="text-slate-300 bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
+                        <strong class="text-yellow-400 block mb-1">Penjelasan:</strong>
+                        <p>${q.explanation}</p>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // --- BADGES & LEADERBOARD RENDERING ---
+        function checkBadgeUnlocks() {
+            if (gameState.completedLevels.includes(1) && gameState.completedLevels.includes(2)) {
+                if (!gameState.badges.includes('trans')) gameState.badges.push('trans');
+            }
+            if (gameState.completedLevels.includes(3)) {
+                if (!gameState.badges.includes('mirror')) gameState.badges.push('mirror');
+            }
+            if (gameState.completedLevels.includes(4)) {
+                if (!gameState.badges.includes('builder')) gameState.badges.push('builder');
+            }
+            if (gameState.completedLevels.includes(5)) {
+                if (!gameState.badges.includes('boss')) gameState.badges.push('boss');
+            }
+            saveGameState();
+        }
+
+        function renderBadgesGallery() {
+            const container = document.getElementById('badge-gallery');
+            container.innerHTML = '';
+
+            BADGES_LIST.forEach(b => {
+                const isUnlocked = gameState.badges.includes(b.id);
+                const div = document.createElement('div');
+                div.className = `glass-panel p-5 rounded-2xl border ${isUnlocked ? 'border-amber-500/40' : 'border-slate-800 opacity-50'} flex items-center gap-4`;
+                div.innerHTML = `
+                    <div class="w-14 h-14 rounded-2xl ${isUnlocked ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-500'} flex items-center justify-center text-3xl font-bold shrink-0">
+                        ${b.icon}
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold ${isUnlocked ? 'text-amber-400' : 'text-slate-500'} uppercase block">${isUnlocked ? '🔓 TERBUKA' : '🔒 TERKUNCI'}</span>
+                        <h4 class="font-bold text-slate-100 text-sm mt-0.5">${b.name}</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">${b.desc}</p>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderLeaderboard() {
+            const table = document.getElementById('leaderboard-table-body');
+            table.innerHTML = '';
+
+            const mockData = [
+                { name: gameState.studentName, score: gameState.score, xp: gameState.xp, rank: document.getElementById('profile-rank').textContent },
+                { name: "Siti Rahmawati", score: 1200, xp: 850, rank: "🏙️ Arsitek Utama" },
+                { name: "Ahmad Dani", score: 980, xp: 620, rank: "🏗️ Perancang Kota" },
+                { name: "Rizky Pratama", score: 750, xp: 450, rank: "📐 Penjelajah Geometri" },
+                { name: "Nabila Putri", score: 500, xp: 300, rank: "🌱 Arsitek Pemula" }
+            ];
+
+            mockData.sort((a, b) => b.score - a.score);
+
+            mockData.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = (item.name === gameState.studentName) ? 'bg-cyan-500/10 font-bold' : '';
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-bold text-cyan-400">#${idx + 1}</td>
+                    <td class="p-4 font-bold text-slate-100">${item.name}</td>
+                    <td class="p-4 text-amber-300 font-bold">${item.score} Poin</td>
+                    <td class="p-4 text-yellow-400 font-bold">${item.xp} XP</td>
+                    <td class="p-4 text-slate-300 text-[11px]">${item.rank}</td>
+                `;
+                table.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
